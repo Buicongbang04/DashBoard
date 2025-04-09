@@ -73,10 +73,48 @@ elif not region and not state:
 elif state and city:
     filter_df = df3[df["State"].isin(state) & df3["City"].isin(city)]
 elif region and city:
-    filter_df = df3[df["State"].isin(region) & df3["City"].isin(city)]
+    filter_df = df3[df["Region"].isin(region) & df3["City"].isin(city)]
 elif region and state:
-    filter_df = df3[df["State"].isin(region) & df3["City"].isin(state)]
+    filter_df = df3[df["Region"].isin(region) & df3["State"].isin(state)]
 elif city:
     filter_df = df3[df3["City"].isin(city)]
 else:
     filter_df = df3[df3['Region'].isin(region) & df3["State"].isin(state) & df3["City"].isin(city)]
+
+category_df = filter_df.groupby(['Category'], as_index=False)["Sales"].sum()
+category_df['Formatted_Sales'] = category_df['Sales'].apply(lambda x: f"${x:,.2f}")
+
+
+with col1:
+    st.subheader("Category wise Sales")
+    fig = px.bar(
+        category_df,
+        x='Category',
+        y='Sales',
+        text='Formatted_Sales',
+        template="seaborn"
+    )
+    st.plotly_chart(fig, use_container_width=True, height=200)
+
+with col2:
+    st.subheader("Region wise Sales")
+    fig = px.pie(filter_df, values='Sales', names='Region', hole=0.5)
+    fig.update_traces(text=filter_df['Region'], textposition='outside')
+    st.plotly_chart(fig, use_container_width=True, height=200)
+
+
+cl1, cl2 = st.columns(2)
+with cl1:
+    with st.expander("Category View Data"):
+        st.write(category_df.style.background_gradient(cmap='Blues'))
+        csv = category_df.to_csv(index=False).encode('utf-8')
+        st.download_button(label="Download CSV", data=csv, file_name='category.csv', mime='text/csv',
+                           help='Click here to download the data in CSV format')
+with cl2:
+    with st.expander("Region View Data"):
+        region_df = filter_df.groupby(['Region'], as_index=False)["Sales"].sum()
+        region_df['Formatted_Sales'] = region_df['Sales'].apply(lambda x: f"${x:,.2f}")
+        st.write(region_df.style.background_gradient(cmap='Oranges'))
+        csv = region_df.to_csv(index=False).encode('utf-8')
+        st.download_button(label="Download CSV", data=csv, file_name='region.csv', mime='text/csv',
+                           help='Click here to download the data in CSV format')

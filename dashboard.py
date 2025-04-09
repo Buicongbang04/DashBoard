@@ -166,4 +166,32 @@ with st.expander("Summary Table"):
     sub_category_year = pd.pivot_table(filter_df, values='Sales', index=['Sub-Category'], columns='month').reset_index()
     st.write(sub_category_year.style.background_gradient(cmap='Reds'))
 
-    
+# Create a scatter plot
+data1 = px.scatter(filter_df, x='Sales', y='Profit', size='Quantity', template='plotly_dark')
+data1.update_layout(
+    title=dict(
+        text='Sales vs Profit',
+        font=dict(size=25)
+    ),
+    xaxis=dict(
+        title=dict(
+            text='Sales',
+            font=dict(size=19)
+        )
+    ),
+    yaxis=dict(
+        title=dict(
+            text='Profit',
+            font=dict(size=19)
+        )
+    )
+)
+st.plotly_chart(data1, use_container_width=True)
+
+with st.expander("View Data"):
+    st.write(filter_df.iloc[:500, 1:20:2].style.background_gradient(cmap='Accent'))
+
+# Download original data
+csv = df.to_csv(index=False).encode('utf-8')
+st.download_button(label="Download Original Data", data=csv, file_name='original_data.csv', mime='text/csv',
+                   help='Click here to download the data in CSV format')

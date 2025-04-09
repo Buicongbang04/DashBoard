@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import plotly.figure_factory as ff
 import pandas as pd
 import os
 import warnings
@@ -140,3 +141,29 @@ fig3 = px.treemap(filter_df, path=['Region', 'Category', 'Sub-Category'], values
                   color='Sub-Category', template='plotly_dark')
 fig3.update_layout(width=800, height=650)
 st.plotly_chart(fig3, use_container_width=True)
+
+chart1, chart2 = st.columns(2)
+with chart1:
+    st.subheader("Segment wise Sales")
+    fig = px.pie(filter_df, values='Sales', names='Segment', template='plotly_dark')
+    fig.update_traces(text=filter_df['Segment'], textposition='inside')
+    st.plotly_chart(fig, use_container_width=True, height=200)
+
+with chart2:
+    st.subheader("Category wise Sales")
+    fig = px.pie(filter_df, values='Sales', names='Category', template='plotly_dark')
+    fig.update_traces(text=filter_df['Category'], textposition='inside')
+    st.plotly_chart(fig, use_container_width=True, height=200)
+
+st.subheader(":point_right: Month wise Sub-category Sales summary")
+with st.expander("Summary Table"):
+    df_sample = df[0:5][['Region', 'State', 'City', 'Category', 'Sales', 'Profit', 'Quantity']]
+    fig = ff.create_table(df_sample, colorscale='cividis')
+    st.plotly_chart(fig, use_container_width=True, height=200)
+
+    st.markdown("Month wise Sub-category Table")
+    filter_df['month'] = filter_df['Order Date'].dt.month_name()
+    sub_category_year = pd.pivot_table(filter_df, values='Sales', index=['Sub-Category'], columns='month').reset_index()
+    st.write(sub_category_year.style.background_gradient(cmap='Reds'))
+
+    

@@ -118,3 +118,18 @@ with cl2:
         csv = region_df.to_csv(index=False).encode('utf-8')
         st.download_button(label="Download CSV", data=csv, file_name='region.csv', mime='text/csv',
                            help='Click here to download the data in CSV format')
+        
+
+# Time Series Analysis
+filter_df['month_year'] = filter_df['Order Date'].dt.to_period('M').astype(str)
+st.subheader("Time Series Analysis")
+lineChart = pd.DataFrame(filter_df.groupby(['month_year'], as_index=False)["Sales"].sum()).reset_index(drop=True)
+fig2 = px.line(lineChart, x='month_year', y='Sales', labels={'Sales':'Amount'},
+               height=500, width=1000,template='gridon')
+st.plotly_chart(fig2, use_container_width=True)
+
+with st.expander("View Time Series Data"):
+    st.write(lineChart.T.style.background_gradient(cmap='Greens'))
+    csv = lineChart.to_csv(index=False).encode('utf-8')
+    st.download_button(label="Download CSV", data=csv, file_name='time_series.csv', mime='text/csv',
+                       help='Click here to download the data in CSV format')
